@@ -1,0 +1,12 @@
+[package]
+name = "globe"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kiss3d = "0.31.0"
+nalgebra = "0.26.0" # latest version doesn't seem to work
+ang = "0.5.0"
+png = "0.17.2"
