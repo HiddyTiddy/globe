@@ -52,7 +52,8 @@ impl Map {
 
         let val = self.at(x, y);
 
-        println!( "{} {} {} -> {} {} -> {}",
+        println!(
+            "{} {} {} -> {} {} -> {}",
             point.x,
             point.y,
             point.z,
@@ -65,7 +66,7 @@ impl Map {
             }
         ); // dump
 
-           // println!("{} {} {:?}", x,y, rgb);
+        // println!("{} {} {:?}", x,y, rgb);
 
         if val == 0xff {
             1.0
@@ -131,14 +132,13 @@ fn mercator_y(latitude: f32) -> f32 {
 }
 
 fn dumb_y(latitude: f32) -> f32 {
-    latitude / PI 
+    latitude / PI
 }
-
 
 // yanked from https://www.youtube.com/watch?v=sLqXFF8mlEU
 fn point_to_coord(point: Point3<f32>) -> (f32, f32) {
     let longitude = point.y.asin();
-    let latitude = atan2(point.x,point.z).in_radians();
+    let latitude = atan2(point.x, point.z).in_radians();
     (latitude, longitude)
 }
 

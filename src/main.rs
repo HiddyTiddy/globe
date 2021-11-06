@@ -4,13 +4,13 @@ extern crate nalgebra as na; // kinda cool https://www.nalgebra.org/
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use kiss3d::resource::Mesh;
 use kiss3d::light::Light;
+use kiss3d::resource::Mesh;
 use kiss3d::window::Window;
 use na::{Point3, Vector3};
 
 const LEN: i32 = 50;
-const RADIUS : f32 = 1.0f32;
+const RADIUS: f32 = 1.0f32;
 mod map;
 
 trait Normaliz {
@@ -28,15 +28,12 @@ impl Normaliz for Point3<f32> {
         let y2: f32 = self.y * self.y;
         let z2: f32 = self.z * self.z;
 
-        // let x = self.x * (1. - (y2 / 2.) - (z2 / 2.) + (y2 * z2 / 3.)).sqrt();
-        // let y = self.y * (1. - (z2 / 2.) - (x2 / 2.) + (x2 * z2 / 3.)).sqrt();
-        // let z = self.z * (1. - (x2 / 2.) - (y2 / 2.) + (x2 * y2 / 3.)).sqrt();
         // let x = self.x / (x2+y2+z2).sqrt();
         // let y = self.y / (x2+y2+z2).sqrt();
         // let z = self.z / (x2+y2+z2).sqrt();
-        let x:f32 = self.x * ((1.0 - (y2 + z2) / 2.0 + (y2 * z2) / 3.).sqrt());
-        let y:f32 = self.y * ((1.0 - (z2 + x2) / 2.0 + (x2 * z2) / 3.).sqrt());
-        let z:f32 = self.z * ((1.0 - (x2 + y2) / 2.0 + (x2 * y2) / 3.).sqrt());
+        let x: f32 = self.x * ((1.0 - (y2 + z2) / 2.0 + (y2 * z2) / 3.).sqrt());
+        let y: f32 = self.y * ((1.0 - (z2 + x2) / 2.0 + (x2 * z2) / 3.).sqrt());
+        let z: f32 = self.z * ((1.0 - (x2 + y2) / 2.0 + (x2 * y2) / 3.).sqrt());
         // println!("({}, {}, {}) -> {}, {}, {}",self.x, self.y, self.z, x,y,z);
         Point3::new(x, y, z)
     }
@@ -55,9 +52,10 @@ fn make_point(i: f32, j: f32, side: u8, karte: &map::Map) -> Point3<f32> {
         4 => Point3::new(RADIUS, i, j),
         5 => Point3::new(-RADIUS, i, j),
         _ => unreachable!(),
-    }.normalize();
+    }
+    .normalize();
     //let height = karte.height_at_point(out);
-    out//.scalar_mult(height)
+    out //.scalar_mult(height)
 }
 
 fn gen_mesh(karte: &map::Map) -> Rc<RefCell<Mesh>> {
@@ -70,7 +68,7 @@ fn gen_mesh(karte: &map::Map) -> Rc<RefCell<Mesh>> {
             for j in 0..LEN {
                 let x: f32 = j as f32 * c - 1.;
                 let y: f32 = i as f32 * c - 1.;
-                // not optimal 
+                // not optimal
                 // redeclare like most of the vertices but it's fine
                 vertices.push(make_point(x, y, side, karte));
                 vertices.push(make_point(x + c, y, side, karte));
@@ -99,7 +97,7 @@ fn gen_mesh(karte: &map::Map) -> Rc<RefCell<Mesh>> {
 
 fn main() {
     let karte = map::Map::new("data/earth-heightmap.png");
-    
+
     let mut window = Window::new("yay");
     let mesh = gen_mesh(&karte);
 
@@ -112,13 +110,10 @@ fn main() {
     c.enable_backface_culling(false);
 
     window.set_light(Light::StickToCamera);
-    // println!("hi");
 
     while window.render() {
         // c.prepend_to_local_rotation(&rot);
     }
-    
 
-    
     // read_png("data/earth-heightmap.png");
 }
