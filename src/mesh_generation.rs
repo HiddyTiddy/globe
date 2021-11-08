@@ -1,8 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::constants::{LEN, RADIUS};
 use kiss3d::resource::Mesh;
 use nalgebra::Point3;
-use crate::constants::{LEN, RADIUS};
 
 trait Normalize {
     fn normalize(&self) -> Point3<f32>;
@@ -49,8 +49,7 @@ fn make_point<F: Fn(Point3<f32>) -> f32>(i: f32, j: f32, side: u8, height: &F) -
     out.scalar_mult(height)
 }
 
-
-pub fn gen_mesh<F: Fn(Point3<f32>) -> f32 >(height: F) -> Rc<RefCell<Mesh>> {
+pub fn gen_mesh<F: Fn(Point3<f32>) -> f32>(height: F) -> Rc<RefCell<Mesh>> {
     let mut vertices = vec![];
     let mut indices = vec![];
     let c = (2. * RADIUS) / (LEN as f32);

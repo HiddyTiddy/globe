@@ -104,7 +104,7 @@ impl Map {
         let y: f32 = (lon + PI) / 2.0 / PI; //((lat + PI) % (2.*PI)) / PI * 0.5;
         let x: f32 = dumb_y(lat);
         // println!("{} <> {}", lat, y);
-        //   let y = y / 3.800_201_2 / 2.0 + 0.5;
+        // let y = y / 3.800_201_2 / 2.0 + 0.5;
 
         (
             (x * self.width as f32) as u32,
