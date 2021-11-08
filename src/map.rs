@@ -52,19 +52,19 @@ impl Map {
 
         let val = self.at(x, y);
 
-        println!(
-            "{} {} {} -> {} {} -> {}",
-            point.x,
-            point.y,
-            point.z,
-            x,
-            y,
-            if val == 0xff {
-                1.0
-            } else {
-                1.0 + (val as f32) * FACTOR
-            }
-        ); // dump
+        // println!(
+        //     "{} {} {} -> {} {} -> {}",
+        //     point.x,
+        //     point.y,
+        //     point.z,
+        //     x,
+        //     y,
+        //     if val == 0xff {
+        //         1.0
+        //     } else {
+        //         1.0 + (val as f32) * FACTOR
+        //     }
+        // ); // dump
 
         // println!("{} {} {:?}", x,y, rgb);
 
