@@ -4,7 +4,9 @@ extern crate nalgebra as na; // kinda cool https://www.nalgebra.org/
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use kiss3d::light::Light;
+use kiss3d::camera::{ArcBall, FirstPerson};
+use kiss3d::ncollide3d::math::Point;
+use kiss3d::{event::WindowEvent, light::Light};
 use kiss3d::resource::Mesh;
 use kiss3d::window::Window;
 use na::{Point3, Vector3};
@@ -54,8 +56,8 @@ fn make_point(i: f32, j: f32, side: u8, karte: &map::Map) -> Point3<f32> {
         _ => unreachable!(),
     }
     .normalize();
-    //let height = karte.height_at_point(out);
-    out //.scalar_mult(height)
+    let height = karte.height_at_point(out);
+    out.scalar_mult(height)
 }
 
 fn gen_mesh(karte: &map::Map) -> Rc<RefCell<Mesh>> {
@@ -99,20 +101,24 @@ fn main() {
     let karte = map::Map::new("data/earth-heightmap.png");
 
     let mut window = Window::new("yay");
+    let eye = Point3::new(10.0f32, 10.0, 10.0);
+    let at = Point::origin();
+    let mut camera = ArcBall::new(eye, at);
+            
     let mesh = gen_mesh(&karte);
-
-    // // let mesh = Rc::new(RefCell::new(Mesh::new(
-    // //     vert, indices, None, None, false
-    // // )));
-
     let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
     c.set_color(0.8, 0.8, 0.8);
     c.enable_backface_culling(false);
 
     window.set_light(Light::StickToCamera);
 
-    while window.render() {
-        // c.prepend_to_local_rotation(&rot);
+    while !window.should_close() {
+        for event in window.events().iter() {
+            if let WindowEvent::Scroll(xshift, yshift, _) = event.value {
+                println!("Cursor pos: ({} , {})", xshift, yshift);
+            } 
+        }
+        window.render_with_camera(&mut camera);
     }
 
     // read_png("data/earth-heightmap.png");
