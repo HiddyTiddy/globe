@@ -35,17 +35,19 @@ fn main() {
         for mut event in window.events().iter() {
             if let WindowEvent::Scroll(_xshift, yshift, _) = event.value {
                 let offset = yshift as f32 / 10.0;
-                let offset = if offset < -1.0 || offset > 1.0 {
+                let offset = if !(-0.1 <= offset && offset <= 0.1) {
                     offset.signum()
                 } else {
                     offset
                 };
-                camera.set_dist(camera.dist() + offset);
+                if camera.dist() + offset > 1.0 {
+                    camera.set_dist(camera.dist() + offset);
+                } else {
+                    camera.set_dist(1.1);
+                }
                 event.inhibited = true
             }
         }
         window.render_with_camera(&mut camera);
     }
-
-    // read_png("data/earth-heightmap.png");
 }
