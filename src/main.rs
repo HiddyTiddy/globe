@@ -35,7 +35,7 @@ fn main() {
         for mut event in window.events().iter() {
             if let WindowEvent::Scroll(_xshift, yshift, _) = event.value {
                 let offset = yshift as f32 / 10.0;
-                let offset = if !(-0.1 <= offset && offset <= 0.1) {
+                let offset = if !(-0.1..=0.1).contains(&offset) {
                     offset.signum()
                 } else {
                     offset

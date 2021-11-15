@@ -3,6 +3,22 @@ use ang::atan2;
 use crate::Point3;
 use std::{f32::consts::PI, fs::File};
 
+#[cfg(test)]
+mod tests {
+    use nalgebra::Point3;
+
+    use crate::map;
+
+
+    #[test]
+    fn test_map() {
+        let karte = map::Map::new("data/earth-heightmap.png");
+        let point = Point3::new(0.0, 1.0, 0.0);
+        let (x,y) = map::Map::point_to_coordinate(&karte, point);
+    }
+}
+
+
 pub struct Map {
     buffer: Vec<u8>,
     height: u32,
