@@ -14,16 +14,17 @@ mod map;
 mod mesh_generation;
 
 fn main() {
-    let _karte = map::Map::new("data/earth-heightmap.png");
+    let karte = map::Map::new("data/earth-heightmap.png");
 
     let mut window = Window::new("yay");
     let eye = Point3::new(10.0f32, 10.0, 10.0);
     let at = Point::origin();
     let mut camera = ArcBall::new(eye, at);
 
-    let mesh = gen_mesh(|_point: Point3<f32>| {
+    let mesh = gen_mesh(|p: Point3<f32>| {
         // &karte.height_at_point(point)
-        1.0
+        karte.height_at(p)
+        // 1.0
     });
     let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
     c.set_color(0.8, 0.8, 0.8);

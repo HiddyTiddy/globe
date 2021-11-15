@@ -1,23 +1,21 @@
-use ang::atan2;
-
 use crate::Point3;
 use std::{f32::consts::PI, fs::File};
 
-#[cfg(test)]
-mod tests {
-    use nalgebra::Point3;
-
-    use crate::map;
-
-
-    #[test]
-    fn test_map() {
-        let karte = map::Map::new("data/earth-heightmap.png");
-        let point = Point3::new(0.0, 1.0, 0.0);
-        let (x,y) = map::Map::point_to_coordinate(&karte, point);
-    }
-}
-
+// #[cfg(test)]
+// mod tests {
+//     use nalgebra::Point3;
+// 
+//     use crate::map;
+// 
+// 
+//     #[test]
+//     fn test_map() {
+//         let karte = map::Map::new("data/earth-heightmap.png");
+//         let point = Point3::new(0.0, 1.0, 0.0);
+//         let (x,y) = map::Map::point_to_coordinate(&karte, point);
+//     }
+// }
+// 
 
 pub struct Map {
     buffer: Vec<u8>,
@@ -25,7 +23,6 @@ pub struct Map {
     width: u32,
 }
 
-const FACTOR: f32 = 1.0 / 255.0;
 
 impl Map {
     /*
@@ -58,110 +55,55 @@ impl Map {
         }
     }
 
-    /*
-     * returns height as given by color value of the image at the specified point.
-     * this does not yet work properly
+    /**
+     * input: Point3<f32>, point on the sphere represented in cartesian coordinates
+     * 
+     * output: f32, height at the given point
      */
-    pub fn height_at_point(&self, point: Point3<f32>) -> f32 {
-        let (x, y) = self.point_to_coordinate(point);
-        // println!("{} {}", lat, lon);
+    pub fn height_at(&self, point: Point3<f32>) -> f32 {
+        let point = to_spherical(point);
+        let (x,y) = projection(point);
+        let x = (x * self.width as f32) as u32;
+        let y = (y * self.height as f32) as u32;
 
-        let val = self.at(x, y);
-
-        // println!(
-        //     "{} {} {} -> {} {} -> {}",
-        //     point.x,
-        //     point.y,
-        //     point.z,
-        //     x,
-        //     y,
-        //     if val == 0xff {
-        //         1.0
-        //     } else {
-        //         1.0 + (val as f32) * FACTOR
-        //     }
-        // ); // dump
-
-        // println!("{} {} {:?}", x,y, rgb);
-
-        if val == 0xff {
+        let h = self.at(x,y);
+        if h == 0xff {
             1.0
         } else {
-            //1.0 + (val as f32) * FACTOR
+            // h as f32 / 255.0 / 3.0+ 1.0
             1.1
         }
     }
-
-    // fn dumb_point_to_coordinate(&self, point: Point3<f32>) -> (u32, u32) {
-    //     let lat = atan2(point.y, point.x).in_radians(); // -pi/2 to pi/2
-    //     let lon: f32 = if point.x != 0.0 {
-    //         (point.z / point.x).atan()
-    //     } else if point.z > 0. {
-    //             PI / 2.
-    //         } else {
-    //             -PI / 2.
-    //     }; // -pi to pi
-    //        // let y = lat.tan().
-
-    //     let x:f32 = lat / PI +0.5;
-    //     let y:f32 = lon / PI / 2.0 + 0.5;
-
-    //     ((x * self.width as f32) as u32, (y * self.height as f32) as u32)
-    // }
-
-    fn point_to_coordinate(&self, point: Point3<f32>) -> (u32, u32) {
-        // let lat = point.z.acos(); // -pi/2 to pi/2
-        // let lon: f32 = ang::atan2(point.x, point.y).in_radians();
-        // let y = lat.tan().
-
-        let (lat, lon) = point_to_coord(point);
-        // println!("{} {}", lat, lon);
-
-        let y: f32 = (lon + PI) / 2.0 / PI; //((lat + PI) % (2.*PI)) / PI * 0.5;
-        let x: f32 = dumb_y(lat);
-        // println!("{} <> {}", lat, y);
-        // let y = y / 3.800_201_2 / 2.0 + 0.5;
-
-        (
-            (x * self.width as f32) as u32,
-            (y * self.height as f32) as u32,
-        )
-    }
 }
 
-const LIMIT: f32 = 1.526_071_1;
+/**
+ * input: Point3<f32>, point in 3d space, cartesian coordinates, (x,y,z)
+ * output: Point3<f32> point in 3d space, spherical coordinates, (r,\theta, \varphi)
+ *                      r \in [0, \infty), \theta \in [0, \pi], \varphi \in [0, 2\pi)
+ */
+fn to_spherical(point: Point3<f32>) -> Point3<f32> {
+    let r: f32 = point.x * point.x + point.y * point.y + point.z * point.z;
+    let r = r.sqrt();
 
-fn mercator_y(latitude: f32) -> f32 {
-    // if latitude > LIMIT {
-    //     latitude = LIMIT - 0.0001;
-    // } else if latitude < -LIMIT {
-    //     latitude = -LIMIT + 0.0001;
-    // }
-    // let tan = (latitude / 2.0 + PI / 4.).tan();
-    // tan.ln() /  / 2.0 + 0.5
-    if !(-LIMIT..=LIMIT).contains(&latitude) {
-        latitude / PI
+    let theta: f32 = point.z / r;
+    let theta = theta.acos();
+
+    let phi =if point.x == 0.0 {
+        PI / 2.0
     } else {
-        let val = (latitude / 2.0 + PI / 4.).tan().ln();
-        val / (LIMIT / 2.0 + PI / 4.0).tan().ln() * 0.4 + 0.5
-    }
+        ang::atan2(point.y, point.x).in_radians()
+    };
+
+    Point3::new(r, theta, phi)
 }
 
-fn dumb_y(latitude: f32) -> f32 {
-    latitude / PI
-}
 
-// yanked from https://www.youtube.com/watch?v=sLqXFF8mlEU
-fn point_to_coord(point: Point3<f32>) -> (f32, f32) {
-    let longitude = point.y.asin();
-    let latitude = atan2(point.x, point.z).in_radians();
-    (latitude, longitude)
+/**
+ * input: Point3<f32>, point in 3d space, spherical coordinates
+ * output:
+ */
+fn projection(point: Point3<f32>) -> (f32, f32){
+    let x = point.z / (2.0 * PI);
+    let y = point.y / PI;
+    (x,y)
 }
-
-// fn coordinate_to_point(lat: f32, lon: f32) -> Point3<f32>{
-//     let y = lat.sin();
-//     let r = lat.cos();
-//     let x = lon.sin() * r;
-//     let z = -lon.cos() * r;
-//     Point3::new(x,y,z)
-// }
