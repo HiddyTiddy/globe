@@ -62,8 +62,8 @@ pub fn gen_mesh<F: Fn(Point3<f32>) -> f32>(height: F) -> Rc<RefCell<Mesh>> {
     for side in 0..6u8 {
         for i in 0..LEN {
             for j in 0..LEN {
-                let x: f32 = j as f32 * c - 1.;
-                let y: f32 = i as f32 * c - 1.;
+                let y: f32 = j as f32 * c - 1.;
+                let x: f32 = i as f32 * c - 1.;
                 // not optimal
                 // redeclare like most of the vertices but it's fine
                 vertices.push(make_point(x, y, side, &height));
