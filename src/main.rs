@@ -13,6 +13,7 @@ mod map;
 
 mod mesh_generation;
 
+
 fn main() {
     let karte = map::Map::new("data/earth-heightmap.png");
 
@@ -27,7 +28,7 @@ fn main() {
         // 1.0
     });
     let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
-    c.set_color(0.8, 0.8, 0.8);
+    c.set_color(0.6, 0.6, 0.8);
     c.enable_backface_culling(false);
 
     window.set_light(Light::StickToCamera);
