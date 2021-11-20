@@ -103,7 +103,18 @@ fn to_spherical(point: Point3<f32>) -> Point3<f32> {
  * output:
  */
 fn projection(point: Point3<f32>) -> (f32, f32){
+    const LIMIT : f32 = 0.4 * PI;
+    let y = point.y;
+    let y:f32 = if !(-LIMIT..=LIMIT).contains(&y) {
+        y / PI
+    } else {
+        let len = (PI / 4.0 + LIMIT / 2.0).tan().ln() * 2.0;
+        (PI / 4.0 + point.y / 2.0).tan().ln() / len * LIMIT
+    };
+    // println!("{}", y);
+
+
     let x = point.z / (2.0 * PI);
-    let y = point.y / PI;
+    //let y = point.y / PI;
     (x,y)
 }
