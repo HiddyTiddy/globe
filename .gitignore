@@ -1,4 +1,4 @@
 /target
 
-dump*
-*dump
+dumps
+.DS_Store
