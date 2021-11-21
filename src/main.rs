@@ -1,10 +1,10 @@
 extern crate kiss3d;
 extern crate nalgebra as na; // kinda cool https://www.nalgebra.org/
 
-use kiss3d::camera::ArcBall;
+use kiss3d::light::Light;
 use kiss3d::ncollide3d::math::Point;
 use kiss3d::window::Window;
-use kiss3d::{event::WindowEvent, light::Light};
+use kiss3d::{camera::ArcBall, event::WindowEvent};
 use mesh_generation::gen_mesh;
 use na::{Point3, Vector3};
 
@@ -12,7 +12,6 @@ mod constants;
 mod map;
 
 mod mesh_generation;
-
 
 fn main() {
     let karte = map::Map::new("data/earth-heightmap.png");
@@ -22,14 +21,12 @@ fn main() {
     let at = Point::origin();
     let mut camera = ArcBall::new(eye, at);
 
-    let mesh = gen_mesh(|p: Point3<f32>| {
-        // &karte.height_at_point(point)
-        karte.height_at(p)
-        // 1.0
-    });
-    let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
-    c.set_color(0.6, 0.6, 0.8);
-    c.enable_backface_culling(false);
+    for side in 0..6u8 {
+        let mesh = gen_mesh(|p: Point3<f32>| karte.height_at(p), side);
+        let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
+        c.set_color(0.6, 0.6, 0.8);
+        c.enable_backface_culling(false);
+    }
 
     window.set_light(Light::StickToCamera);
 
