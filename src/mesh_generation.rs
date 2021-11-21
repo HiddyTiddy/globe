@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use crate::constants::{LEN, RADIUS};
 use kiss3d::resource::Mesh;
 use nalgebra::Point3;
+// use kiss3d::nalgebra::OPoint;
 
 /*
 dumb trait for Point3<f32>
