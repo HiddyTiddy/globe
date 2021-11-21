@@ -21,14 +21,18 @@ fn main() {
     let at = Point::origin();
     let mut camera = ArcBall::new(eye, at);
 
+    let mut faces = vec![];
     for side in 0..6u8 {
         let mesh = gen_mesh(|p: Point3<f32>| karte.height_at(p), side);
         let mut c = window.add_mesh(mesh, Vector3::new(1.0, 1.0, 1.0));
-        c.set_color(0.6, 0.6, 0.8);
+        
+        c.set_color(0.6, 0.6,  0.8);
         c.enable_backface_culling(false);
+        faces.push(c);
     }
 
     window.set_light(Light::StickToCamera);
+    let mut is_wireframe = false;
 
     while !window.should_close() {
         for mut event in window.events().iter() {
@@ -38,13 +42,28 @@ fn main() {
                     offset.signum()
                 } else {
                     offset
-                };
-                if camera.dist() + offset > 1.0 {
+                } / 10.0;
+                if camera.dist() + offset > 1.2 {
                     camera.set_dist(camera.dist() + offset);
                 } else {
-                    camera.set_dist(1.1);
+                    camera.set_dist(1.20);
                 }
                 event.inhibited = true
+            } else if let WindowEvent::Char(ch) = event.value {
+                if ch == 'w' {
+                    for face in &mut faces {
+                    if is_wireframe {
+                            face.set_points_size(2.0);
+                            face.set_lines_width(1.0);
+                            face.set_surface_rendering_activation(false);
+                    } else {
+                            face.set_points_size(0.0);
+                            face.set_lines_width(0.0);
+                            face.set_surface_rendering_activation(true);
+                        }
+                    }
+                    is_wireframe = !is_wireframe;
+                }
             }
         }
         window.render_with_camera(&mut camera);
