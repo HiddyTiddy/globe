@@ -76,8 +76,8 @@ impl Map {
         if h == 0xff {
             1.0
         } else {
-            // h as f32 / 255.0 / 5.0+ 1.0
-            1.1
+            h as f32 / 255.0 / 5.0 + 1.0
+            // 1.1
         }
     }
 }
@@ -91,23 +91,25 @@ fn to_spherical(point: Point3<f32>) -> Point3<f32> {
     let r: f32 = point.x * point.x + point.y * point.y + point.z * point.z;
     let r = r.sqrt();
 
-    let theta: f32 = point.z / r;
+    let theta: f32 = point.y / r;
     let theta = theta.acos();
 
-    let phi = if point.x == 0.0 {
+    let phi = if point.z == 0.0 {
         PI / 2.0
     } else {
-        ang::atan2(point.y, point.x).in_radians()
+        ang::atan2(point.x, point.z).in_radians()
     };
 
     Point3::new(r, theta, phi)
 }
 
 // lol
+#[allow(dead_code)]
 const LOOKUP_X: [f32; 19] = [
     1.0000, 0.9986, 0.9954, 0.9900, 0.9822, 0.9730, 0.9600, 0.9427, 0.9216, 0.8962, 0.8679, 0.8350,
     0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722, 0.5322,
 ];
+#[allow(dead_code)]
 const LOOKUP_Y: [f32; 19] = [
     0.0000, 0.0620, 0.1240, 0.1860, 0.2480, 0.3100, 0.3720, 0.4340, 0.4958, 0.5571, 0.6176, 0.6769,
     0.7346, 0.7903, 0.8435, 0.8936, 0.9394, 0.9761, 1.0000,
@@ -117,23 +119,13 @@ const LOOKUP_Y: [f32; 19] = [
  * input: x0, x1; two floats from the robinson table, and lat: f32, latitude in degrees
  * output: properly interpolated value, idk lol
  */
+#[allow(dead_code)]
 fn interpolate(x0: f32, x1: f32, lat0: f32, lat: f32) -> f32 {
     x0 + ((lat - lat0) * (x1 - x0)) / 5.0
 }
 
-/**
- * input: Point3<f32>, point in 3d space, spherical coordinates
- * output:
- */
-fn projection(point: Point3<f32>) -> (f32, f32) {
-    // const LIMIT: f32 = 0.40 * PI;
-    // let y = point.y - 0.5 * PI;
-    // let y: f32 = if !(-LIMIT..=LIMIT).contains(&y) {
-    //     y / PI
-    // } else {
-    //    let len = (PI / 4.0 + LIMIT / 2.0).tan().ln() * 2.0;
-    //     (PI / 4.0 + y / 2.0).tan().ln() / len * 0.80
-    // } + 0.5;
+#[allow(dead_code)]
+fn robinson_projection(point: Point3<f32>) -> (f32, f32) {
     let idx = (point.y / PI * 18.0) as usize;
     let x0 = LOOKUP_X[idx];
     let x1 = LOOKUP_X[idx + 1];
@@ -146,9 +138,27 @@ fn projection(point: Point3<f32>) -> (f32, f32) {
     let y = interpolate(y0, y1, idx as f32 * 5.0, point.y / PI * 90.0);
 
     let x = 0.8487 * x * (point.z + PI) / 5.333;
-    // println!("{}", x);
-
-    // let x = point.z / (2.01 * PI) + 0.5;
     // let y = point.y / PI;
+    (x, y)
+}
+
+/**
+ * input: Point3<f32>, point in 3d space, spherical coordinates
+ * output:
+ */
+fn projection(point: Point3<f32>) -> (f32, f32) {
+    mercator_projection(point)
+}
+
+fn mercator_projection(point: Point3<f32>) -> (f32, f32) {
+    const LIMIT: f32 = 0.40 * PI;
+    let y = point.y - 0.5 * PI;
+    let y: f32 = if !(-LIMIT..=LIMIT).contains(&y) {
+        y / PI
+    } else {
+        let len = (PI / 4.0 + LIMIT / 2.0).tan().ln() * 2.0;
+        (PI / 4.0 + y / 2.0).tan().ln() / len * 0.80
+    } + 0.5;
+    let x = point.z / (2.01 * PI) + 0.5;
     (x, y)
 }
